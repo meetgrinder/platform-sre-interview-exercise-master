@@ -12,6 +12,7 @@ service:
   targetPort: 8000
 
 ingress:
+  ingressClassName: nginx
   enabled: true
   hosts:
     - host: currency-api.com
