@@ -1,0 +1,7 @@
+fastapi
+fastapi-utils
+requests
+typing-inspect
+python-dateutil
+pytz
+uvicorn
