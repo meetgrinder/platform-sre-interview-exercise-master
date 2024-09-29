@@ -1,0 +1,17 @@
+
+replicaCount: 1
+
+image:
+  repository: currency_api
+  pullPolicy: Never
+  tag: "0.0.1"
+
+service:
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000
+
+ingress:
+  enabled: false
+
+resources: {}
