@@ -101,4 +101,4 @@ def conversion_rates_checker() -> None:
 
 
 if __name__ == "__main__":
-    uvicorn.run("api:app", host="0.0.0.0", port=serve_port, reload=True)
+    uvicorn.run("api:app", host="0.0.0.0", port=int(serve_port), reload=True)
