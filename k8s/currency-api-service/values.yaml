@@ -12,6 +12,11 @@ service:
   targetPort: 8000
 
 ingress:
-  enabled: false
+  enabled: true
+  hosts:
+    - host: currency-api.com
+      paths:
+        - path: /converter
+          pathType: Prefix
 
 resources: {}
