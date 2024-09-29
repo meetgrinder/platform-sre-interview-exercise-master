@@ -15,7 +15,7 @@ app = FastAPI()
 conversion_base_cur = os.getenv('CONVERSION_BASE_CUR', 'usd')
 conversion_rate_endpoint = os.getenv('CONVERSION_RATE_ENDPOINT',
                                      f'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{conversion_base_cur}.json')
-converter_tz = os.getenv('CONVERTER_TIMEZONE', 'America/New_York')
+converter_tz = os.getenv('CONVERTER_TIMEZONE', 'US/Eastern')
 endpoint_recheck_period = os.getenv('ENDPOINT_RECHECK_PERIOD', 60)  # secs
 serve_port = os.getenv('SERVE_PORT', 8000)
 
@@ -80,7 +80,7 @@ def conversion_rates_checker() -> None:
     global currency_conversions_usd
     try:
         today = datetime.datetime.now(tz=tz.UTC)  # tz=tz.UTC
-        ny_tz = pytz.timezone('US/Eastern')
+        ny_tz = pytz.timezone(converter_tz)
         today_tz = today.astimezone(ny_tz)
         today_date = today_tz.strftime('%Y-%m-%d')
         print(f'{today_date}')
