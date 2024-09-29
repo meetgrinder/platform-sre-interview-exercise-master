@@ -1,59 +1,83 @@
-from fastapi import FastAPI
 import asyncio
-from fastapi_utils.tasks import repeat_every
-import requests
 import datetime
 from dateutil import tz
-import pytz
-import traceback
+from fastapi import FastAPI, HTTPException
+from fastapi_utils.tasks import repeat_every
+# from http.client import HTTPException
 import json
+import os
+import pytz
+import requests
 import uvicorn
-
 
 app = FastAPI()
 
-conversion_rate_endpoint = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json'
-converter_tz = 'America/New_York'
+conversion_base_cur = os.getenv('CONVERSION_BASE_CUR', 'usd')
+conversion_rate_endpoint = os.getenv('CONVERSION_RATE_ENDPOINT',
+                                     f'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{conversion_base_cur}.json')
+converter_tz = os.getenv('CONVERTER_TIMEZONE', 'America/New_York')
+endpoint_recheck_period = os.getenv('ENDPOINT_RECHECK_PERIOD', 60)  # secs
+serve_port = os.getenv('SERVE_PORT', 8000)
 
 currency_conversions_usd = {}
-conversion_update_time = None
 
-# TODO - consider putting this in the conv endpoint url but depends upon how thats passed into the service as configmap
-conversion_base_cur = 'usd'
-endpoint_recheck_period = 60 # in seconds
 
 @app.get("/v1/currencies")
 async def get_currencies():
+    usd_dict = currency_conversions_usd.get(conversion_base_cur)
+    key_list = list(usd_dict.keys())
+    print(f'key_list: {key_list}')
+    if not usd_dict:
+        raise HTTPException(status_code=404, detail=f"currency conversion is experiencing issues")
 
-    return {"message": "hello"}
+    return {"currency_list":  key_list}
+
 
 @app.get("/v1/rates/direct/{from_currency}/{to_currency}")
-async def get_currency_rate(from_currency:str, to_currency:str):
+async def get_currency_rate(from_currency: str, to_currency: str):
     usd_dict = currency_conversions_usd.get(conversion_base_cur)
+    if not usd_dict:
+        raise HTTPException(status_code=404, detail=f"currency conversion is experiencing issues")
+
     usd_from_currency = usd_dict.get(from_currency)
+    if not usd_from_currency:
+        raise HTTPException(status_code=404, detail=f"from_currency {from_currency} not found")
+
     usd_to_currency = usd_dict.get(to_currency)
-    final_rate = usd_to_currency/usd_from_currency
+    if not usd_to_currency:
+        raise HTTPException(status_code=404, detail=f"to_currency {to_currency} not found")
+
+    final_rate = usd_to_currency / usd_from_currency
     resp = {'from_currency': from_currency,
             'to_currency': to_currency,
             'rate': final_rate}
     return resp
 
+
 @app.get("/v1/rates/synthetic/{from_currency}/{to_currency}")
-async def get_synthetic_rate(from_currency:str, to_currency:str):
+async def get_synthetic_rate(from_currency: str, to_currency: str):
     usd_dict = currency_conversions_usd.get(conversion_base_cur)
     usd_from_currency = usd_dict.get(from_currency)
     usd_to_currency = usd_dict.get(to_currency)
-    thru = usd_dict.get('jpy')
-    jump1 = thru/usd_from_currency
-    jump2 = thru/usd_to_currency
-    final_rate = jump1/jump2
-    return {"syn1 thru jpy": final_rate}
+    synth_rates = {'from_currency': from_currency,
+                   'to_currency': to_currency}
+    for thru_key, thru_val in usd_dict.items():
+        if thru_key == from_currency or thru_key == to_currency:
+            continue
+
+        jump1 = thru_val / usd_from_currency
+        jump2 = thru_val / usd_to_currency
+        synth_rate = jump1 / jump2
+        synth_resp_key = f'thru_{thru_key}'
+        synth_rates[synth_resp_key] = synth_rate
+
+    return synth_rates
+
 
 @app.on_event("startup")
 @repeat_every(seconds=endpoint_recheck_period)  # 1 min
 def conversion_rates_checker() -> None:
     global currency_conversions_usd
-
     try:
         today = datetime.datetime.now(tz=tz.UTC)  # tz=tz.UTC
         ny_tz = pytz.timezone('US/Eastern')
@@ -71,11 +95,10 @@ def conversion_rates_checker() -> None:
         print(f'{usd_rates}')
         currency_conversions_usd = json.loads(usd_rates)
     except:
-        #todo - logging
+        # todo - logging
         print('exception trying to get rates')
         # traceback.format_exc()
 
 
 if __name__ == "__main__":
-    uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)
-
+    uvicorn.run("api:app", host="0.0.0.0", port=serve_port, reload=True)
