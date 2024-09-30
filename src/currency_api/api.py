@@ -35,12 +35,10 @@ stream_handler = logging.StreamHandler(sys.stdout)
 log_formatter = logging.Formatter("%(asctime)s [%(processName)s: %(process)d] [%(threadName)s: %(thread)d] [%(levelname)s] %(name)s: %(message)s")
 stream_handler.setFormatter(log_formatter)
 logger.addHandler(stream_handler)
-
+print(f'logging_level: {logging_level}')
 
 @app.get(root_path + "/v1/currencies")
 async def get_currencies():
-    print(f'logging_level: {logging_level}')
-    print(f'logging.INFO: {logging.INFO}')
     usd_dict = currency_conversions_usd.get(conversion_base_cur)
     if not usd_dict:
         logging.error('get_currencies could not retrieve the base currency dict info')

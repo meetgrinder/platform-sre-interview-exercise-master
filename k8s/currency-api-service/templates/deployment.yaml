@@ -25,5 +25,10 @@ spec:
                 configMapKeyRef:
                   name: currency-api-config
                   key: CURRENCY_API_PATH_PREFIX
+            - name: CURRENCY_API_LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: currency-api-config
+                  key: CURRENCY_API_LOG_LEVEL
           resources: {{- toYaml .Values.resources | nindent 12 }}
 

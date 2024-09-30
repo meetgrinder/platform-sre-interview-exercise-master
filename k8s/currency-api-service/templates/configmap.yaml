@@ -11,3 +11,4 @@ data:
       {{- end }}
     {{- end }}
   {{- end }}
+  CURRENCY_API_LOG_LEVEL: DEBUG
