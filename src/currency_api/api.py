@@ -10,8 +10,8 @@ import pytz
 import requests
 import uvicorn
 
-root_path = os.getenv('CURRENCY_API_PATH_PREFIX', None)
-app = FastAPI(root_path=root_path)
+root_path = os.getenv('CURRENCY_API_PATH_PREFIX', '')
+app = FastAPI()
 
 conversion_base_cur = os.getenv('CONVERSION_BASE_CUR', 'usd')
 conversion_rate_endpoint = os.getenv('CONVERSION_RATE_ENDPOINT',
@@ -23,7 +23,7 @@ serve_port = os.getenv('SERVE_PORT', 8000)
 currency_conversions_usd = {}
 
 
-@app.get("/v1/currencies")
+@app.get(root_path + "/v1/currencies")
 async def get_currencies():
     usd_dict = currency_conversions_usd.get(conversion_base_cur)
     key_list = list(usd_dict.keys())
@@ -34,7 +34,7 @@ async def get_currencies():
     return {"currency_list":  key_list}
 
 
-@app.get("/v1/rates/direct/{from_currency}/{to_currency}")
+@app.get(root_path + "/v1/rates/direct/{from_currency}/{to_currency}")
 async def get_currency_rate(from_currency: str, to_currency: str):
     usd_dict = currency_conversions_usd.get(conversion_base_cur)
     if not usd_dict:
@@ -55,7 +55,7 @@ async def get_currency_rate(from_currency: str, to_currency: str):
     return resp
 
 
-@app.get("/v1/rates/synthetic/{from_currency}/{to_currency}")
+@app.get(root_path + "/v1/rates/synthetic/{from_currency}/{to_currency}")
 async def get_synthetic_rate(from_currency: str, to_currency: str):
     usd_dict = currency_conversions_usd.get(conversion_base_cur)
     usd_from_currency = usd_dict.get(from_currency)
