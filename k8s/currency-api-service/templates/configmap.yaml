@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: currency-api-config
-  namespace: default
+  namespace: {{ .Release.Namespace }}
 data:
   {{- if .Values.ingress.enabled -}}
     {{- range .Values.ingress.hosts }}

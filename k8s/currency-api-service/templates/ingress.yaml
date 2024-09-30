@@ -3,6 +3,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "currency-api-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "currency-api-service.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
