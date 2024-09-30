@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: currency-api-config
+  namespace: default
+data:
+  {{- if .Values.ingress.enabled -}}
+    {{- range .Values.ingress.hosts }}
+      {{- range .paths }}
+        CURRENCY_API_PATH_PREFIX: {{ .path }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
