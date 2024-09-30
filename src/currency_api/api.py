@@ -10,7 +10,8 @@ import pytz
 import requests
 import uvicorn
 
-app = FastAPI()
+root_path = os.getenv('CURRENCY_API_PATH_PREFIX', None)
+app = FastAPI(root_path=root_path)
 
 conversion_base_cur = os.getenv('CONVERSION_BASE_CUR', 'usd')
 conversion_rate_endpoint = os.getenv('CONVERSION_RATE_ENDPOINT',

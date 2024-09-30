@@ -19,4 +19,11 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           ports:
             - containerPort: {{ .Values.service.targetPort }}
+          env:
+            - name: CURRENCY_API_PATH_PREFIX
+              valueFrom:
+                configMapKeyRef:
+                  name: currency-api-config
+                  key: CURRENCY_API_PATH_PREFIX
           resources: {{- toYaml .Values.resources | nindent 12 }}
+
