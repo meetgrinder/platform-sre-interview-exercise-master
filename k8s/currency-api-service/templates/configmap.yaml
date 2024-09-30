@@ -11,4 +11,4 @@ data:
       {{- end }}
     {{- end }}
   {{- end }}
-  CURRENCY_API_LOG_LEVEL: DEBUG
+        CURRENCY_API_LOG_LEVEL: '{{ .Values.currency_api.log_level }}'

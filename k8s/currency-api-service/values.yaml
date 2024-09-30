@@ -4,7 +4,7 @@ replicaCount: 1
 image:
   repository: currency_api
   pullPolicy: Never
-  tag: "0.0.3"
+  tag: "0.0.4"
 
 service:
   type: ClusterIP
@@ -21,3 +21,5 @@ ingress:
           pathType: Prefix
 
 resources: {}
+currency_api:
+  log_level: DEBUG
